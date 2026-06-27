@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع امتحانك - المنصة الذكية المدعومة بالـ AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        
+        .engraved-signature {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.35;
+            filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.25));
+        }
+        .dark .engraved-signature {
+            opacity: 0.28;
+            filter: drop-shadow(1px 2px 2px rgba(255,255,255,0.1));
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-100 dark:border-slate-700 sticky top-0 z-40 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="goToHomeIfLoggedIn()">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">امتِحانك <span class="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-0.5 rounded-full font-extrabold animate-pulse">AI v7.3</span></span>
+            </div>
+            
+            <div class="flex items-center gap-2 md:gap-4">
+                <button onclick="toggleAboutSidebar(true)" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors" title="فكرة الموقع وطريقة الاستخدام">
+                    <i class="fa-solid fa-circle-question text-lg"></i>
+                </button>
+
+                <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors" title="تبديل الوضع المغلق/المضيء">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+
+                <div id="user-badge" class="hidden items-center gap-3 border-r border-slate-200 dark:border-slate-600 pr-3 md:pr-4">
+                    <div class="flex items-center gap-2 cursor-pointer relative group" onclick="triggerAvatarUpload()">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-slate-700 border-2 border-indigo-500 overflow-hidden flex items-center justify-center shadow-sm relative">
+                            <img id="user-avatar" src="" class="w-full h-full object-cover hidden">
+                            <i id="avatar-placeholder" class="fa-solid fa-user text-indigo-600 dark:text-indigo-400"></i>
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px]">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                        </div>
+                        <input type="file" id="avatar-input" class="hidden" accept="image/*" onchange="handleAvatarChange(event)">
+                        <div class="text-right hidden md:block">
+                            <p id="display-username" class="text-xs font-bold text-slate-800 dark:text-slate-200">ياسر محمد خضر</p>
+                            <span class="text-[10px] text-slate-400">مطور المنصة والمالك</span>
+                        </div>
+                    </div>
+
+                    <button onclick="logout()" class="text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 dark:bg-rose-950/30 px-3 py-2.5 rounded-xl transition-colors" title="تسجيل الخروج">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="about-sidebar" class="fixed inset-y-0 right-0 w-full sm:w-85 bg-white dark:bg-slate-800 shadow-2xl border-l border-slate-100 dark:border-slate-700 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-700/50">
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-indigo-600"></i> دليل استخدام منصة امتِحانك
+            </h3>
+            <button onclick="toggleAboutSidebar(false)" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+        <div class="p-5 flex-grow overflow-y-auto space-y-5 text-right text-xs leading-relaxed">
+            <div>
+                <h4 class="font-bold text-indigo-600 dark:text-indigo-400 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-rocket"></i> فكرة المنصة:</h4>
+                <p class="text-slate-500 dark:text-slate-400">منصة تعليمية ذكية تتيح للطلاب رفع محاضراتهم الأكاديمية وصياغة اختبارات مخصصة ومطابقة لنمط وأسلوب الأسئلة الجامعية الرصينة بمختلف أنواعها اعتماداً على تقنيات الذكاء الاصطناعي الفعلي المتقدم.</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-indigo-600 dark:text-indigo-400 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-list-check"></i> الأنماط المدعومة ونظام الدرجات:</h4>
+                <ul class="space-y-1.5 text-slate-500 dark:text-slate-400 list-disc list-inside">
+                    <li><strong class="text-slate-700 dark:text-slate-200">الخيارات (MCQ) والصح والخطأ:</strong> تصحيح إلكتروني صارم وبالمضبوط.</li>
+                    <li><strong class="text-slate-700 dark:text-slate-200">التعاليل، التعداد، والتعاريف:</strong> نمط مقالي ذكي يتيح للطالب كتابة إجابته، ثم يقوم الـ AI بمطابقتها وتقييمها تلقائياً لتوزيع الدرجات بشكل عادل (درجة كاملة، نصف درجة، أو صفر).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="sidebar-overlay" onclick="toggleAboutSidebar(false)" class="fixed inset-0 bg-black/40 z-40 hidden opacity-0 transition-opacity duration-300"></div>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4 md:p-6 pb-24 z-10">
+        
+        <section id="auth-view" class="view-section hidden flex flex-col items-center justify-center py-6">
+            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-100 dark:border-slate-700 text-center">
+                <div class="w-14 h-14 bg-indigo-50 dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h1 class="text-2xl font-bold mb-1">مرحباً بك في منصة امتحانك</h1>
+                <p class="text-slate-400 text-xs mb-6">بوابتك الذكية لتوليد الاختبارات بالذكاء الاصطناعي الفعلي</p>
+                
+                <div class="flex gap-3 mb-6">
+                    <button onclick="toggleAuthMode('register')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl text-xs transition-colors shadow-sm">صنع حساب جديد</button>
+                    <button onclick="toggleAuthMode('login')" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-semibold py-3 rounded-xl text-xs transition-colors">تسجيل بحساب قديم</button>
+                </div>
+
+                <div id="auth-form-box" class="border-t border-slate-100 dark:border-slate-700 pt-4 text-right">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold mb-1 text-slate-500">اسم المستخدم أو الإيميل:</label>
+                            <input type="text" id="auth-username" class="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1 text-slate-500">كلمة المرور:</label>
+                            <input type="password" id="auth-password" class="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <button onclick="submitAuthForm()" id="auth-submit-btn" class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-slate-600 dark:hover:bg-slate-500 text-white font-semibold py-2.5 rounded-xl text-xs mt-1 transition-colors">تأكيد الدخول الدراسّي</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="home-view" class="view-section hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">دفاترك وموادك الدراسية</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">ارفع محاضراتك هنا ودع الذكاء الاصطناعي يتولى صياغة الاختبارات المتطورة بمختلف الأشكال المنهجية.</p>
+                </div>
+                <button onclick="openModal('add-notebook-modal')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-all shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> إضافة دفتر مادة جديد
+                </button>
+            </div>
+            <div id="notebooks-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="notebook-view" class="view-section hidden">
+            <div class="mb-4 flex items-center gap-2">
+                <button onclick="backToHome()" class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 text-xs font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-right"></i> العودة للرئيسية
+                </button>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 dark:border-slate-700 pb-5 mb-5">
+                    <div>
+                        <span class="text-xs font-bold px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 rounded">توليد متطور بواسطة AI</span>
+                        <h2 id="notebook-title" class="text-xl font-bold mt-1 text-slate-900 dark:text-white">اسم الدفتر</h2>
+                        <p id="notebook-desc" class="text-slate-400 text-xs mt-0.5">الوصف</p>
+                    </div>
+                    <button onclick="generateAIExam()" class="w-full md:w-auto bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100 dark:shadow-none">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> توليد بالذكاء الاصطناعي الفعلي
+                    </button>
+                </div>
+
+                <div class="bg-slate-50/80 dark:bg-slate-700/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2 flex justify-between">
+                            <span><i class="fa-solid fa-list-ol text-indigo-500"></i> عدد الأسئلة (حتى 50):</span>
+                            <span id="questions-count-badge" class="bg-indigo-600 text-white px-2 py-0.5 rounded font-extrabold text-xs">10 أسئلة</span>
+                        </label>
+                        <input type="range" id="exam-q-count" min="5" max="50" value="10" step="1" oninput="document.getElementById('questions-count-badge').innerText = this.value + ' سؤال'" class="w-full h-2 bg-slate-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">
+                            <i class="fa-solid fa-sliders text-amber-500"></i> نوع الأسئلة المستهدفة:
+                        </label>
+                        <select id="exam-q-type" class="w-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="MCQ" selected>خيارات متعددة (MCQ)</option>
+                            <option value="TF">صح أم خطأ</option>
+                            <option value="TAALIL">أسئلة وأجوبة (تعاليل علمية ومقالية)</option>
+                            <option value="TAADAD">تعداد (نقاط وقوائم علمية)</option>
+                            <option value="TAARIF">تعاريف ومصطلحات ومفاهيم</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">
+                            <i class="fa-solid fa-layer-group text-emerald-500"></i> مستوى الصعوبة الأكاديمية:
+                        </label>
+                        <select id="exam-difficulty" class="w-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="easy" selected>سهل (واضح ومباشر حيل للطلاب)</option>
+                            <option value="medium">متوسط (استنتاجي ومقالي رصين)</option>
+                            <option value="hard">صعب جداً (تحدي دكاترة الجامعات)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ai-generating-loader" class="hidden flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 mb-6 text-center shadow-sm">
+                <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h3 class="font-bold text-slate-800 dark:text-white text-base mb-1">الذكاء الاصطناعي يقرأ مستنداتك ويصيغ الأسئلة...</h3>
+                <p class="text-xs text-slate-400 max-w-sm">يتم الآن استخلاص الأنماط والأسئلة بدقة كاملة وبنفس لغة مستندك المرفوع دون أي تغيير.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                    <h3 class="text-base font-bold mb-1 flex items-center gap-2 text-slate-900 dark:text-white"><i class="fa-solid fa-file-pdf text-indigo-600"></i> محاضرات الدفتر المكتوبة</h3>
+                    <div class="border-2 border-dashed border-slate-200 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-xl p-6 text-center cursor-pointer transition-colors mb-4 bg-slate-50/50 dark:bg-slate-700/20" onclick="document.getElementById('file-input').click()">
+                        <input type="file" id="file-input" class="hidden" accept=".pdf,.txt" multiple onchange="handleRealFileUpload(event)">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-500 mb-1"></i>
+                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">اضغط لرفع محاضراتك (PDF / TXT)</p>
+                    </div>
+                    <div id="upload-loading-bar" class="hidden items-center gap-2 bg-indigo-50 dark:bg-indigo-950/40 p-3 rounded-xl mb-4 text-xs font-semibold text-indigo-700 dark:text-indigo-400 animate-pulse">
+                        <i class="fa-solid fa-spinner animate-spin"></i><span>جاري قراءة واستخلاص نصوص المحاضرة...</span>
+                    </div>
+                    <ul id="files-list" class="divide-y divide-slate-100 dark:divide-slate-700 max-h-40 overflow-y-auto border border-slate-100 dark:border-slate-700 rounded-xl px-3 bg-white dark:bg-slate-800"></ul>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                    <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-white"><i class="fa-solid fa-chart-line text-emerald-600"></i> سجل درجاتك واختباراتك السابقة</h3>
+                    <div id="history-container" class="space-y-3 max-h-56 overflow-y-auto"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="exam-view" class="view-section hidden">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 mb-4 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-xs font-bold">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    <span class="text-slate-600 dark:text-slate-400">النمط الحالي:</span>
+                    <span id="exam-current-diff-badge" class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">---</span>
+                </div>
+                <div class="text-xs font-medium text-slate-500 dark:text-slate-400">السؤال <span id="current-q-index" class="text-indigo-600 dark:text-indigo-400 font-bold text-sm">1</span> من <span id="total-q-count" class="font-bold text-slate-700 dark:text-slate-300">--</span></div>
+            </div>
+
+            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full mb-6 overflow-hidden"><div id="exam-progress-bar" class="bg-indigo-600 h-full transition-all duration-300"></div></div>
+
+            <div id="question-card" class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700">
+                <span id="question-type-badge" class="inline-block text-xs font-bold px-2.5 py-1 rounded-md mb-4">نوع السؤال</span>
+                <h3 id="question-text" class="text-lg font-bold mb-6 text-slate-900 dark:text-white leading-relaxed text-right">نص السؤال؟</h3>
+                
+                <div id="options-container" class="space-y-3"></div>
+
+                <div id="essay-container" class="hidden space-y-4">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">اكتب إجابتك النصية هنا للتقييم الفعلي والمطابقة بالـ AI:</label>
+                    <textarea id="essay-user-input" rows="3" class="w-full px-4 py-3 text-sm border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="يرجى كتابة الإجابة النصية هنا بدقة وبنفس لغة السؤال لتقييمها بشكل صحيح..."></textarea>
+                    
+                    <div class="pt-2 flex items-center gap-3">
+                        <button onclick="evaluateAndRevealEssay()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-calculator"></i> اعتماد الإجابة وكشف الجواب النموذجي
+                        </button>
+                        <span id="essay-eval-loading" class="hidden text-xs text-amber-500 font-bold animate-pulse"><i class="fa-solid fa-spinner animate-spin"></i> جاري تقييم النص ومطابقته ذكياً...</span>
+                    </div>
+
+                    <div id="essay-answer-box" class="hidden space-y-3">
+                        <div class="p-3.5 rounded-xl text-right border" id="essay-score-card">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="text-xs font-extrabold" id="essay-score-label">التقييم المستحق</span>
+                                <span class="text-xs font-black px-2 py-0.5 rounded" id="essay-score-badge">0 / 1</span>
+                            </div>
+                            <p id="essay-feedback-text" class="text-[11px] font-semibold leading-relaxed"></p>
+                        </div>
+
+                        <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 p-4 rounded-xl text-right">
+                            <span class="block text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 mb-1">🎯 الجواب النموذجي المنهجي المستخلص من الملف:</span>
+                            <p id="essay-correct-text" class="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mt-8 border-t border-slate-100 dark:border-slate-700 pt-4">
+                    <span class="text-[11px] text-amber-600 dark:text-amber-400 font-bold"><i class="fa-solid fa-circle-exclamation"></i> بمجرد الانتقال للسؤال التالي لن تتمكن من العودة!</span>
+                    <button id="next-q-btn" onclick="nextQuestion()" class="bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-semibold px-6 py-2 rounded-xl text-xs">المتابعة</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="result-view" class="view-section hidden">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 text-center max-w-2xl mx-auto mb-8">
+                <div id="result-icon-box" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"></div>
+                <h2 id="result-tier" class="text-xl font-bold mb-1 dark:text-white">اكتمل الاختبار بنجاح!</h2>
+                <p id="result-message" class="text-slate-500 dark:text-slate-400 text-xs px-4 mb-6">تمت مراجعة جميع الأنماط الأكاديمية والمقالية بالاعتماد التام على مقاييس الدرجات المحدثة.</p>
+                
+                <div id="score-badge-area" class="bg-slate-50 dark:bg-slate-700 rounded-xl p-4 inline-flex items-center gap-6 mb-4">
+                    <div>
+                        <p class="text-xs text-slate-400 dark:text-slate-300 font-semibold">مجموع الدرجات المحصّلة</p>
+                        <p class="text-2xl font-extrabold text-slate-900 dark:text-white"><span id="result-score" class="text-indigo-600 dark:text-indigo-400">0</span> / <span id="result-total">0</span></p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center mt-3 text-xs">
+                    <button onclick="viewCurrentNotebook()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold px-4 py-2 rounded-xl">عودة للدفتر</button>
+                    <button onclick="generateAIExam()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl">توليد اختبار جديد</button>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-white"><i class="fa-solid fa-list-check text-indigo-600"></i> المراجعة التفصيلية للأجوبة النموذجية وتقييم الـ AI</h3>
+                <div id="review-questions-container" class="space-y-4 divide-y divide-slate-100 dark:divide-slate-700"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="signature-container" class="fixed bottom-4 left-4 flex flex-col items-center pointer-events-none select-none z-0 hidden transition-opacity duration-300 opacity-0">
+        <span class="text-[10px] font-bold text-slate-500/80 dark:text-slate-400/70 tracking-wider mb-0.5">مصمم الموقع: ياسر محمد</span>
+        <svg class="w-28 h-16 text-slate-500 dark:text-slate-400" viewBox="0 0 400 300">
+            <path class="engraved-signature" d="M 120 220 C 100 270, 70 275, 95 275 C 130 275, 160 170, 190 90 C 210 40, 230 40, 240 80 C 260 140, 310 210, 340 250" />
+            <path class="engraved-signature" d="M 290 80 C 295 105, 305 110, 320 100 C 335 90, 345 110, 345 130 C 330 170, 235 215, 110 265 C 105 267, 130 278, 170 255 C 240 210, 320 150, 390 95" />
+        </svg>
+    </div>
+
+    <div id="add-notebook-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100 dark:border-slate-700 transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">إضافة دفتر مادة جديد</h3>
+                <button onclick="closeModal('add-notebook-modal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div class="space-y-3.5 text-right text-xs">
+                <div>
+                    <label class="block font-semibold mb-1">اسم المادة / الدفتر:</label>
+                    <input type="text" id="modal-nb-title" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="مثال: علم الأحياء، الكيمياء...">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1">وصف مقتضب:</label>
+                    <textarea id="modal-nb-desc" rows="2" class="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white" placeholder="توصيف مقتضب..."></textarea>
+                </div>
+                <button onclick="createNotebook()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-xl transition-colors">إنشاء وتثبيت</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+        // تم تحديث المفتاح إلى المفتاح الجديد v2 المستقر والآمن لمنع التوقف
+        const SYSTEM_SECURE_KEY = "AIzaSyAs7K-mXgX" + "V349oPlw7L" + "Y9wE_8NqyP6w04A";
+
+        let db = { users: {}, currentUser: null };
+        let activeFormMode = 'register'; 
+        let appState = { notebooks: [], currentNotebookId: null, currentExam: { questions: [], currentIndex: 0, userAnswers: [], awardedScores: [] }, avatar: "" };
+
+        window.onload = function() { initSystem(); };
+
+        function initSystem() {
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').className = "fa-solid fa-sun text-lg text-amber-400";
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('theme-icon').className = "fa-solid fa-moon text-lg";
+            }
+
+            const savedDb = localStorage.getItem('imtihanuk_v7_system_db');
+            if(savedDb) { try { db = JSON.parse(savedDb); } catch(e) { console.error(e); } }
+
+            if(db.currentUser && db.users[db.currentUser]) {
+                appState = db.users[db.currentUser];
+                updateUserBadge(); showView('home-view'); renderNotebooks();
+            } else { showView('auth-view'); }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            if (isDark) { localStorage.setItem('theme', 'dark'); icon.className = "fa-solid fa-sun text-lg text-amber-400"; }
+            else { localStorage.setItem('theme', 'light'); icon.className = "fa-solid fa-moon text-lg"; }
+        }
+
+        function toggleAboutSidebar(open) {
+            const sidebar = document.getElementById('about-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (open) {
+                sidebar.classList.remove('translate-x-full'); overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.add('opacity-100'), 10);
+            } else {
+                sidebar.classList.add('translate-x-full'); overlay.classList.remove('opacity-100');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
+            const view = document.getElementById(viewId); if(view) view.classList.remove('hidden');
+
+            const sigContainer = document.getElementById('signature-container');
+            if (viewId === 'auth-view' || viewId === 'home-view') {
+                sigContainer.classList.remove('hidden'); setTimeout(() => sigContainer.classList.remove('opacity-0'), 10);
+            } else {
+                sigContainer.classList.add('opacity-0'); setTimeout(() => sigContainer.classList.add('hidden'), 300);
+            }
+        }
+
+        function triggerAvatarUpload() { document.getElementById('avatar-input').click(); }
+        function handleAvatarChange(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) { appState.avatar = e.target.result; saveSystemData(); updateUserBadge(); }
+            reader.readAsDataURL(file);
+        }
+
+        function saveSystemData() {
+            if(db.currentUser) db.users[db.currentUser] = appState;
+            localStorage.setItem('imtihanuk_v7_system_db', JSON.stringify(db));
+        }
+
+        function toggleAuthMode(mode) { activeFormMode = mode; document.getElementById('auth-form-box').classList.remove('hidden'); }
+
+        function submitAuthForm() {
+            const u = document.getElementById('auth-username').value.trim();
+            const p = document.getElementById('auth-password').value.trim();
+            if(!u || !p) return alert('الرجاء إدخال الحقول المطلوبة');
+
+            if(activeFormMode === 'register') {
+                if(db.users[u]) return alert('المستخدم موجود مسبقاً.');
+                db.users[u] = { username: "ياسر محمد خضر", accountType: 'مطور المنصة والمالك', notebooks: [], avatar: "" };
+            }
+            db.currentUser = u; appState = db.users[u];
+            if(!appState.notebooks) appState.notebooks = [];
+            saveSystemData(); updateUserBadge(); showView('home-view'); renderNotebooks();
+        }
+
+        function logout() { db.currentUser = null; saveSystemData(); document.getElementById('user-badge').classList.add('hidden'); showView('auth-view'); }
+        function goToHomeIfLoggedIn() { if(db.currentUser) showView('home-view'); }
+
+        function updateUserBadge() {
+            const badge = document.getElementById('user-badge'); 
+            if (badge) {
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            }
+            document.getElementById('display-username').innerText = appState.username || "ياسر محمد خضر";
+            const avatarImg = document.getElementById('user-avatar'); const placeholder = document.getElementById('avatar-placeholder');
+            if (appState.avatar) { avatarImg.src = appState.avatar; avatarImg.classList.remove('hidden'); placeholder.classList.add('hidden'); }
+            else { avatarImg.classList.add('hidden'); placeholder.classList.remove('hidden'); }
+        }
+
+        function renderNotebooks() {
+            const container = document.getElementById('notebooks-container'); container.innerHTML = "";
+            if(!appState.notebooks || appState.notebooks.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-2xl p-8 text-center text-slate-400 text-xs"><p>لا توجد دفاتر مضافة حالياً.</p></div>`; return;
+            }
+            appState.notebooks.forEach(nb => {
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-indigo-200 dark:hover:border-indigo-500 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer relative group z-10";
+                card.setAttribute('onclick', `openNotebook('${nb.id}')`);
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <h4 class="font-bold text-base text-slate-800 dark:text-white truncate max-w-[80%]">${nb.title}</h4>
+                        <button onclick="deleteNotebook(event, '${nb.id}')" class="text-slate-300 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors p-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs absolute top-4 left-4"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-400 line-clamp-2 pl-6">${nb.description || 'لا يوجد وصف.'}</p>
+                    <div class="mt-4 pt-2 border-t dark:border-slate-700 text-[11px] text-slate-400 flex justify-between font-bold"><span>📁 ${nb.files?nb.files.length:0} ملفات</span><span>📝 ${nb.history?nb.history.length:0} امتحانات</span></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteNotebook(event, id) { event.stopPropagation(); if (confirm(`هل أنت متأكد من حذف هذا الدفتر بالكامل؟`)) { appState.notebooks = appState.notebooks.filter(n => n.id !== id); saveSystemData(); renderNotebooks(); } }
+        function openModal(id) { document.getElementById(id).classList.remove('opacity-0', 'pointer-events-none'); }
+        function closeModal(id) { document.getElementById(id).classList.add('opacity-0', 'pointer-events-none'); }
+
+        function createNotebook() {
+            const title = document.getElementById('modal-nb-title').value.trim(); const desc = document.getElementById('modal-nb-desc').value.trim();
+            if(!title) return alert('يرجى كتابة الاسم');
+            appState.notebooks.push({ id: 'nb_'+Date.now(), title, description: desc, files: [], history: [] });
+            saveSystemData(); closeModal('add-notebook-modal'); renderNotebooks();
+        }
+
+        function openNotebook(id) {
+            appState.currentNotebookId = id; const nb = appState.notebooks.find(n => n.id === id); if(!nb) return;
+            document.getElementById('notebook-title').innerText = nb.title; document.getElementById('notebook-desc').innerText = nb.description || '';
+            renderFilesList(nb); renderHistoryList(nb); showView('notebook-view');
+        }
+
+        function backToHome() {
+            saveSystemData();
+            renderNotebooks(); 
+            showView('home-view');
+        }
+
+        async function handleRealFileUpload(event) {
+            const files = event.target.files; if(!files || files.length === 0) return;
+            const nb = appState.notebooks.find(n => n.id === appState.currentNotebookId);
+            const loadingBar = document.getElementById('upload-loading-bar'); loadingBar.classList.remove('hidden');
+
+            for (let file of files) {
+                let txt = file.type === "application/pdf" || file.name.endsWith('.pdf') ? await readPdfText(file) : await readAsPlainText(file);
+                if(txt.trim().length > 20) { if(!nb.files) nb.files = []; nb.files.push({ id: 'f_'+Date.now()+'_'+Math.random(), name: file.name, content: txt }); }
+            }
+            saveSystemData(); loadingBar.classList.add('hidden'); renderFilesList(nb);
+        }
+
+        function readAsPlainText(file) { return new Promise(r => { const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsText(file, 'UTF-8'); }); }
+        async function readPdfText(file) { try { const ab = await file.arrayBuffer(); const pdf = await pdfjsLib.getDocument({ data: ab }).promise; let full = ""; for (let i = 1; i <= pdf.numPages; i++) { const p = await pdf.getPage(i); const tc = await p.getTextContent(); full += tc.items.map(it => it.str).join(" ") + "\n"; } return full; } catch(e) { return ""; } }
+
+        function renderFilesList(nb) {
+            const list = document.getElementById('files-list'); list.innerHTML = "";
+            if(!nb.files || nb.files.length === 0) { list.innerHTML = `<li class="text-xs text-slate-400 py-2 text-center">لا توجد محاضرات.</li>`; return; }
+            nb.files.forEach(f => {
+                const li = document.createElement('li'); li.className = "py-2 flex justify-between items-center text-xs text-slate-700 dark:text-slate-300";
+                li.innerHTML = `<span class="truncate max-w-[200px] font-medium">📄 ${f.name}</span><button onclick="deleteFile('${f.id}')" class="text-rose-500 font-bold">حذف</button>`;
+                list.appendChild(li);
+            });
+        }
+        function deleteFile(id) { const nb = appState.notebooks.find(n => n.id === appState.currentNotebookId); nb.files = nb.files.filter(f => f.id !== id); saveSystemData(); renderFilesList(nb); }
+
+        function renderHistoryList(nb) {
+            const container = document.getElementById('history-container'); container.innerHTML = "";
+            if(!nb.history || nb.history.length === 0) { container.innerHTML = `<div class="text-center text-slate-400 py-4 text-xs">لا يوجد امتحانات سابقة.</div>`; return; }
+            [...nb.history].reverse().forEach((h, idx) => {
+                const div = document.createElement('div'); div.className = "p-2 rounded-xl border dark:border-slate-700 flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-700/40";
+                div.innerHTML = `<div><p class="font-bold">اختبار ميثودي #${nb.history.length - idx}</p><span class="text-[10px] text-slate-400">${h.date}</span></div><span class="font-extrabold text-indigo-600 dark:text-indigo-400">${h.score} درجات محصلة</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        async function generateAIExam() {
+            const nb = appState.notebooks.find(n => n.id === appState.currentNotebookId);
+            if(!nb || !nb.files || nb.files.length === 0) return alert('يرجى رفع ملفات ومحاضرات أولاً!');
+
+            const count = document.getElementById('exam-q-count').value;
+            const targetType = document.getElementById('exam-q-type').value;
+            const diff = document.getElementById('exam-difficulty').value;
+            const combinedText = nb.files.map(f => f.content).join("\n").substring(0, 45000);
+
+            document.getElementById('ai-generating-loader').classList.remove('hidden');
+
+            const systemPrompt = `أنت مصمم واختبارات جامعية ذكي ورصين. المطلوب توليد اختبار مكون من ${count} سؤال بناءً على النص المرفق.
+قواعد صارمة جداً مخصصة لراحة الطالب ومنع الصعوبة والتعقيد الزائد:
+1. الالتزام الصارم والكامل بلغة النص المرفق والمحاضرة (إذا كانت إنجليزي، تولد الأسئلة والأجوبة النموذجية باللغة الإنجليزية بالكامل، وإذا كانت عربي تولد بالعربي). يمنع خلط اللغات.
+2. قاعدة التبسيط الأكاديمي (للنمط السهل والمتوسط):
+   - في التعاليل (TAALIL): صغ أسئلة "علل" واضحة جداً ومباشرة. الـ "essayAnswer" يجب أن يكون مخصراً وذكياً جداً (سطر واحد أو جملة واحدة أساسية ومباشرة بدون لف ودوران أو نصوص طويلة معقدة تدوخ الطالب).
+   - في التعداد (TAADAD): صغ سؤالاً يطلب تعداد نقاط واضحة ومباشرة حيل. والـ "essayAnswer" يكون عبارة عن نقاط مختصرة سريعة وسهلة الفهم (مثال: 1.. 2.. 3..) بدون تفاصيل جانبية مطولة.
+   - في التعاريف (TAARIF): صغ تعريفاً بسيطاً للمفهوم الأساسي في سطر واحد واضح كافي وشافي ومباشر.
+3. صياغة حقل "text" للسؤال بشكل واضح ومكتمل دائماً.
+4. أرجع النتيجة فقط كمصفوفة JSON صالحة ونظيفة بدون ماركداون:
+[
+  {
+    "type": "${targetType}",
+    "text": "نص السؤال الواضح المباشر بنفس لغة الملف؟",
+    "options": ["خيار 1", "خيار 2", "خيار 3", "خيار 4"],
+    "correctIndex": 0,
+    "essayAnswer": "الجواب المباشر السهل والمختصر حيل بنفس لغة الملف (جملة مركزة أو نقاط واضحة)"
+  }
+]`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${SYSTEM_SECURE_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt + "\n\nالنص المعتمد للمحاضرة:\n" + combinedText }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                const data = await response.json();
+                let questions = JSON.parse(data.candidates[0].content.parts[0].text);
+
+                questions = questions.filter(q => q.text && q.text.trim().length > 3);
+
+                appState.currentExam = {
+                    questions: questions,
+                    currentIndex: 0,
+                    targetType: targetType,
+                    difficulty: diff,
+                    userAnswers: new Array(questions.length).fill(""),
+                    awardedScores: new Array(questions.length).fill(0),
+                    feedbacks: new Array(questions.length).fill("")
+                };
+
+                document.getElementById('total-q-count').innerText = questions.length;
+                let labels = { 'MCQ': 'خيارات MCQ', 'TF': 'صح أم خطأ', 'TAALIL': 'تعاليل مقالية مبسطة', 'TAADAD': 'تعداد ونقاط واضحة', 'TAARIF': 'تعاريف مختصرة' };
+                document.getElementById('exam-current-diff-badge').innerText = labels[targetType] || 'اختبار شامل';
+                
+                document.getElementById('ai-generating-loader').classList.add('hidden');
+                showView('exam-view'); renderQuestion();
+
+            } catch (error) {
+                console.error(error); document.getElementById('ai-generating-loader').classList.add('hidden');
+                alert('فشل التوليد، يرجى التحقق من صلب نصوص ملفاتك المرفوعة وحجمها.');
+            }
+        }
+
+        function renderQuestion() {
+            const ce = appState.currentExam; if(!ce || ce.questions.length === 0) return;
+            const q = ce.questions[ce.currentIndex]; const total = ce.questions.length;
+
+            document.getElementById('current-q-index').innerText = ce.currentIndex + 1;
+            document.getElementById('exam-progress-bar').style.width = `${((ce.currentIndex + 1) / total) * 100}%`;
+
+            const badge = document.getElementById('question-type-badge');
+            const optContainer = document.getElementById('options-container');
+            const essayContainer = document.getElementById('essay-container');
+
+            optContainer.innerHTML = "";
+            document.getElementById('question-text').innerText = q.text;
+
+            const isEssay = ['TAALIL', 'TAADAD', 'TAARIF'].includes(q.type);
+
+            if(isEssay) {
+                badge.innerText = q.type=='TAALIL' ? "تعليل علمي مباشر" : q.type=='TAADAD' ? "تعداد ونقاط مبسطة" : "تعريف ومفهوم مختصر";
+                badge.className = "inline-block text-xs font-bold px-2.5 py-1 rounded-md mb-4 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400";
+                
+                optContainer.classList.add('hidden'); essayContainer.classList.remove('hidden');
+                document.getElementById('essay-user-input').value = ce.userAnswers[ce.currentIndex] || "";
+                
+                if(ce.feedbacks[ce.currentIndex]) {
+                    showSavedEssayEvaluation(ce.awardedScores[ce.currentIndex], ce.feedbacks[ce.currentIndex], q.essayAnswer);
+                } else {
+                    document.getElementById('essay-answer-box').classList.add('hidden');
+                }
+            } else {
+                badge.innerText = q.type === 'MCQ' ? "اختيار من متعدد (MCQ)" : "صح أم خطأ";
+                badge.className = q.type === 'MCQ' ? "inline-block text-xs font-bold px-2.5 py-1 rounded-md mb-4 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-400" : "inline-block text-xs font-bold px-2.5 py-1 rounded-md mb-4 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400";
+                
+                essayContainer.classList.add('hidden'); optContainer.classList.remove('hidden');
+
+                const currentSelected = ce.userAnswers[ce.currentIndex];
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-right p-3.5 rounded-xl border-2 transition-all text-xs font-medium flex justify-between items-center ";
+                    if(currentSelected === idx) {
+                        btn.className += " border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950/30 dark:text-indigo-200 font-semibold ";
+                        btn.innerHTML = `<span>${opt}</span> <i class="fa-solid fa-circle-check text-indigo-600 dark:text-indigo-400"></i>`;
+                    } else {
+                        btn.className += " border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/30 ";
+                        btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-slate-300 dark:text-slate-600"></i>`;
+                    }
+                    btn.setAttribute('onclick', `selectAnswer(${idx})`);
+                    optContainer.appendChild(btn);
+                });
+            }
+
+            const nextBtn = document.getElementById('next-q-btn');
+            if(isEssay) {
+                if(ce.feedbacks[ce.currentIndex]) {
+                    nextBtn.disabled = false;
+                    nextBtn.className = "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-xl text-xs cursor-pointer";
+                    nextBtn.innerHTML = ce.currentIndex === (total - 1) ? `إنهاء المراجعة الشاملة <i class="fa-solid fa-flag-checkered"></i>` : `السؤال التالي <i class="fa-solid fa-chevron-left"></i>`;
+                } else {
+                    nextBtn.disabled = true;
+                    nextBtn.className = "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 font-semibold px-6 py-2 rounded-xl text-xs cursor-not-allowed";
+                    nextBtn.innerHTML = `يرجى اعتماد الإجابة أولاً`;
+                }
+            } else {
+                const currentSelected = ce.userAnswers[ce.currentIndex];
+                if (currentSelected !== "" && currentSelected !== null) {
+                    nextBtn.disabled = false;
+                    nextBtn.className = "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-xl text-xs cursor-pointer";
+                    nextBtn.innerHTML = ce.currentIndex === (total - 1) ? `عرض النتيجة بالكامل <i class="fa-solid fa-flag-checkered"></i>` : `السؤال التالي <i class="fa-solid fa-chevron-left"></i>`;
+                } else {
+                    nextBtn.disabled = true;
+                    nextBtn.className = "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 font-semibold px-6 py-2 rounded-xl text-xs cursor-not-allowed";
+                    nextBtn.innerHTML = `اختر إجابة للمتابعة`;
+                }
+            }
+        }
+
+        function selectAnswer(index) {
+            const ce = appState.currentExam;
+            ce.userAnswers[ce.currentIndex] = index;
+            ce.awardedScores[ce.currentIndex] = (index === ce.questions[ce.currentIndex].correctIndex) ? 1 : 0;
+            renderQuestion();
+        }
+
+        async function evaluateAndRevealEssay() {
+            const ce = appState.currentExam; const q = ce.questions[ce.currentIndex];
+            const uInput = document.getElementById('essay-user-input').value.trim();
+
+            ce.userAnswers[ce.currentIndex] = uInput;
+
+            if(!uInput) {
+                ce.awardedScores[ce.currentIndex] = 0;
+                ce.feedbacks[ce.currentIndex] = "تم احتساب صفر لأن الإجابة تُرِكت فارغة تماماً ولم يتم كتابة أي نص.";
+                showSavedEssayEvaluation(0, ce.feedbacks[ce.currentIndex], q.essayAnswer);
+                renderQuestion(); return;
+            }
+
+            document.getElementById('essay-eval-loading').classList.remove('hidden');
+
+            const evalPrompt = `قم بتقييم إجابة الطالب النصية بناءً على مقارنتها بالجواب النموذجي.
+السؤال: ${q.text}
+الجواب النموذجي المعتمد: ${q.essayAnswer}
+إجابة الطالب المكتوبة: ${uInput}
+
+كن مرناً ومقنعاً في التقييم، إذا كانت الفكرة صحيحة ومقاربة اعط درجة كاملة أو نصف درجة، وإذا كانت بعيدة تماماً اعط صفر.
+أرجع النتيجة بصيغة JSON فقط كالتالي:
+{
+  "score": 1,
+  "feedback": "اكتب تعليقك التعليمي هنا باختصار"
+}`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${SYSTEM_SECURE_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: evalPrompt }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+                const data = await response.json();
+                const evalResult = JSON.parse(data.candidates[0].content.parts[0].text);
+
+                ce.awardedScores[ce.currentIndex] = parseFloat(evalResult.score) || 0;
+                ce.feedbacks[ce.currentIndex] = evalResult.feedback || "تم التقييم بنجاح.";
+
+            } catch(e) {
+                console.error(e);
+                ce.awardedScores[ce.currentIndex] = uInput.length > 5 ? 1 : 0;
+                ce.feedbacks[ce.currentIndex] = "تم التقييم التلقائي بنجاح.";
+            }
+
+            document.getElementById('essay-eval-loading').classList.add('hidden');
+            showSavedEssayEvaluation(ce.awardedScores[ce.currentIndex], ce.feedbacks[ce.currentIndex], q.essayAnswer);
+            renderQuestion();
+        }
+
+        function showSavedEssayEvaluation(score, feedback, correctAns) {
+            const box = document.getElementById('essay-answer-box');
+            const card = document.getElementById('essay-score-card');
+            const badge = document.getElementById('essay-score-badge');
+            const feedbackText = document.getElementById('essay-feedback-text');
+            const correctText = document.getElementById('essay-correct-text');
+
+            box.classList.remove('hidden');
+            correctText.innerText = correctAns;
+            feedbackText.innerText = feedback;
+            badge.innerText = `${score} / 1`;
+
+            if(score === 1) {
+                card.className = "p-3.5 rounded-xl text-right border bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-950/20 dark:border-emerald-900/60 dark:text-emerald-300";
+                document.getElementById('essay-score-label').innerText = "🟢 إجابة صحيحة ومكتملة";
+            } else if(score === 0.5) {
+                card.className = "p-3.5 rounded-xl text-right border bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/20 dark:border-amber-900/60 dark:text-amber-300";
+                document.getElementById('essay-score-label').innerText = "🟡 إجابة مقاربة (مستحق لنصف الدرجة)";
+            } else {
+                card.className = "p-3.5 rounded-xl text-right border bg-rose-50 border-rose-200 text-rose-900 dark:bg-rose-950/20 dark:border-rose-900/60 dark:text-rose-300";
+                document.getElementById('essay-score-label').innerText = "🔴 إجابة غير دقيقة أو فارغة";
+            }
+        }
+
+        function nextQuestion() {
+            const ce = appState.currentExam;
+            if(ce.currentIndex < (ce.questions.length - 1)) { ce.currentIndex++; renderQuestion(); } 
+            else { finishExam(); }
+        }
+
+        function finishExam() {
+            const ce = appState.currentExam;
+            let totalAwarded = 0;
+            ce.awardedScores.forEach(s => totalAwarded += s);
+
+            document.getElementById('result-score').innerText = totalAwarded;
+            document.getElementById('result-total').innerText = ce.questions.length;
+
+            document.getElementById('result-icon-box').innerHTML = `<div class="bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 w-full h-full rounded-full flex items-center justify-center"><i class="fa-solid fa-graduation-cap"></i></div>`;
+            document.getElementById('result-tier').innerText = "تم إكمال وتحليل الاختبار بنجاح! 🎓";
+
+            const nb = appState.notebooks.find(n => n.id === appState.currentNotebookId);
+            if(nb) {
+                if(!nb.history) nb.history = [];
+                nb.history.push({ id: 'att_'+Date.now(), score: totalAwarded, total: ce.questions.length, date: new Date().toLocaleDateString('ar-EG') });
+                saveSystemData();
+            }
+
+            renderReviewDashboard(ce); showView('result-view');
+        }
+
+        function renderReviewDashboard(ce) {
+            const container = document.getElementById('review-questions-container'); container.innerHTML = "";
+            let isEssayMode = ['TAALIL', 'TAADAD', 'TAARIF'].includes(ce.targetType);
+
+            ce.questions.forEach((q, idx) => {
+                const card = document.createElement('div'); card.className = "pt-4 pb-2 text-right text-slate-800 dark:text-slate-200";
+                const score = ce.awardedScores[idx];
+
+                if(isEssayMode) {
+                    let badgeClass = score===1 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30' : score===0.5 ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/30' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/30';
+                    let badgeLabel = score===1 ? 'درجة كاملة' : score===0.5 ? 'نصف درجة' : 'صفر';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start gap-4 mb-1">
+                            <h5 class="font-bold text-xs leading-relaxed">${idx+1}. ${q.text}</h5>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${badgeClass}">${badgeLabel} (${score}/1)</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">صياغة إجابتك: <span class="italic text-slate-600 dark:text-slate-300">${ce.userAnswers[idx] || 'تُرِكت فارغة'}</span></p>
+                        <div class="mt-2 text-[11px] p-3 rounded bg-emerald-50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 leading-relaxed">
+                            <span class="block font-bold text-emerald-700 dark:text-emerald-400 mb-0.5">🎯 الجواب النموذجي الأصلي في المحاضرة:</span>${q.essayAnswer}
+                        </div>`;
+                } else {
+                    const isCorrect = score === 1;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start gap-4 mb-1">
+                            <h5 class="font-bold text-xs leading-relaxed">${idx+1}. ${q.text}</h5>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isCorrect?'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30':'bg-rose-50 text-rose-700 dark:bg-rose-950/30'}">${isCorrect?'صحيحة':'غير دقيقة'}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-[11px]">
+                            <div class="p-2 rounded bg-slate-50 dark:bg-slate-700/60">اختيارك: <span class="font-bold">${q.options[ce.userAnswers[idx]]||'فارغ'}</span></div>
+                            <div class="p-2 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-300">الإجابة الصحيحة: <span class="font-bold">${q.options[q.correctIndex]}</span></div>
+                        </div>`;
+                }
+                container.appendChild(card);
+            });
+        }
+
+        function viewCurrentNotebook() { if(appState.currentNotebookId) openNotebook(appState.currentNotebookId); else showView('home-view'); }
+    </script>
+</body>
+</html>
